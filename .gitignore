@@ -8,4 +8,4 @@ dist/
 build/
 coverage/
 *.log
-*.tsbuildinfo
+*.tsbuildinfonode_modules/
