@@ -31,7 +31,7 @@ function YouTubeAnalytics() {
       error_callback: (error) => {
         console.error('Auth error:', error);
       },
-      redirect_uri: 'http://localhost:5173/oauth2callback'
+      redirect_uri: 'https://localhost:5173/oauth2callback'
     });
 
     client.requestAccessToken();
