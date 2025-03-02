@@ -8,10 +8,13 @@ function YouTubeAnalytics() {
 
   useEffect(() => {
     const initializeGoogleAuth = () => {
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: config.googleClientId,
-        redirect_uri: 'http://localhost:5173/oauth2callback',
-        scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly',
+        gapi.load('auth2', () => {
+            gapi.auth2.init({
+                client_id: config.googleClientId,
+                scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly',
+                redirect_uri: 'http://localhost:5173/oauth2callback',
+            }).then(() => {
+            });
         callback: (response) => {
           if (response?.access_token) {
             fetchYouTubeAnalytics(response.access_token);
