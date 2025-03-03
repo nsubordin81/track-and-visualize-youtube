@@ -4,29 +4,34 @@ import { redirect } from 'react-router-dom';
 
 function YouTubeAnalytics() {
   const [analyticsData, setAnalyticsData] = useState(null);
-  const [tokenClient, setTokenClient] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const initializeGoogleAuth = () => {
-        gapi.load('auth2', () => {
-            gapi.auth2.init({
-                client_id: config.googleClientId,
-                scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly',
-                redirect_uri: 'http://localhost:5173/oauth2callback',
-            }).then(() => {
-            });
-        callback: (response) => {
-          if (response?.access_token) {
-            fetchYouTubeAnalytics(response.access_token);
-          }
-        }
+      window.gapi.client.init({
+        apiKey: config.googleApiKey,
+        clientId: config.googleClientId,
+        discoveryDocs: ['https://youtubeanalytics.googleapis.com/$discovery/rest?version=v2'],
+        scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly'
+      }).then(() => {
+        // Listen for sign-in state changes
+        window.gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+        // Handle initial sign-in state
+        updateSigninStatus(window.gapi.auth2.getAuthInstance().isSignedIn.get());
       });
-      setTokenClient(client);
+    };
+
+    const updateSigninStatus = (isSignedIn) => {
+      setIsAuthenticated(isSignedIn);
+      if (isSignedIn) {
+        const token = window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+        fetchYouTubeAnalytics(token);
+      }
     };
 
     const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.onload = initializeGoogleAuth;
+    script.src = 'https://apis.google.com/js/api.js';
+    script.onload = () => window.gapi.load('client:auth2', initializeGoogleAuth);
     document.body.appendChild(script);
 
     return () => document.body.removeChild(script);
@@ -48,8 +53,8 @@ function YouTubeAnalytics() {
 
   return (
     <div>
-      {!analyticsData && tokenClient && (
-        <button onClick={() => tokenClient.requestAccessToken()}>
+      {!analyticsData && !isAuthenticated && (
+        <button onClick={() => window.gapi.auth2.getAuthInstance().signIn()}>
           Sign in with Google
         </button>
       )}

@@ -1,6 +1,6 @@
 export const config = {
     googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    googleClientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET
+    googleApiKey: import.meta.env.VITE_GOOGLE_API_KEY
 };
 
 export default config;
